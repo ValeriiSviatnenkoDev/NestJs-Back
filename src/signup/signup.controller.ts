@@ -1,4 +1,5 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 
 import { SignUpDto } from './signup.dto';
 import { SignupService } from './signup.service';
@@ -10,8 +11,9 @@ export class SignupController {
     ) { }
 
     @Post()
-    registerUser(@Body() signupDto: SignUpDto) {
-        return this.signupService.registerUser(signupDto);
+    async registerUser(@Body() signupDto: SignUpDto, @Res() res: Response) {
+        const result = await this.signupService.registerUser(signupDto);
+        return res.send(result);
     }
 }
 

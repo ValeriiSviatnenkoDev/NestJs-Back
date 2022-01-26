@@ -1,9 +1,9 @@
-import { Injectable, Req, Res } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-import { UserModel } from './signup.model';
+import { UserModel } from 'src/models/user.model';
 
 interface User {
     userLogin: string;
@@ -22,19 +22,23 @@ export class SignupService {
             const candidate = await this.userModel.findOne({ useremail: user.userEmail });
 
             if (candidate) {
-                return 'Такой пользователь уже существует! Попробуйте другую почту!';
+                return { error: { message: 'Такой пользователь уже существует! Попробуйте другую почту!' }, status: false };
             }
+
+            const hashPassword = bcrypt.hashSync(user.userPassword, 10);
 
             const newUser = new this.userModel({
                 userlogin: user.userLogin,
                 useremail: user.userEmail,
-                userpassword: user.userPassword,
+                userpassword: hashPassword,
                 userrole: 'User',
                 userlvl: 1,
                 userxp: 0
             })
 
             await newUser.save();
+
+            return { newUser, status: true };
         } catch (error) {
             console.error(error);
         }
